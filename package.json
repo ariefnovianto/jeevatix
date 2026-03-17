@@ -13,6 +13,7 @@
     "clean": "turbo run clean"
   },
   "devDependencies": {
+    "sst": "^4.3.5",
     "turbo": "latest",
     "typescript": "latest"
   }
