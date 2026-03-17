@@ -15,6 +15,7 @@ Platform ini menggunakan pendekatan *monorepo* dengan perpaduan teknologi beriku
 * **Backend / API:** [Hono](https://hono.dev/) (Super-fast, lightweight web framework)
 * **Frontend:** [Astro](https://astro.build/) (Islands Architecture) + [Svelte](https://svelte.dev/) (Interactive UI)
 * **Database & Connection Pooling:** PostgreSQL (Self-Hosted) + Cloudflare Hyperdrive
+* **ORM & Database Client:** [Drizzle ORM](https://orm.drizzle.team/) (Edge-ready, Type-safe SQL builder)
 
 ---
 
