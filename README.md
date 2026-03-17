@@ -11,6 +11,7 @@ Jeevatix adalah platform jual beli tiket *event* berkinerja tinggi yang dirancan
 Platform ini menggunakan pendekatan *monorepo* dengan perpaduan teknologi berikut:
 
 * **Infrastructure as Code (IaC):** [SST (Serverless Stack)](https://sst.dev/)
+* **Build System:** [Turborepo](https://turbo.build/) (Manajemen eksekusi *task* monorepo yang sangat cepat & *incremental*)
 * **Edge Compute:** Cloudflare Workers
 * **Backend / API:** [Hono](https://hono.dev/) (Super-fast, lightweight web framework)
 * **Frontend:** [Astro](https://astro.build/) (Islands Architecture) + [Svelte](https://svelte.dev/) (Interactive UI)
@@ -77,6 +78,7 @@ jeevatix/
 │   ├── core/           # Logika bisnis utama, koneksi database, utils
 │   └── types/          # Shared TypeScript interfaces (Event, Ticket, dll)
 ├── sst.config.ts       # Konfigurasi infrastruktur SST
+├── turbo.json          # Pipeline eksekusi Turborepo
 ├── package.json        # Root package (Workspaces config)
 └── README.md
 ```
@@ -111,8 +113,8 @@ Duplikat file `.env.example` menjadi `.env` di *root directory* dan isi variabel
 cp .env.example .env
 
 
-### 3. Jalankan Local Development (SST Live)
-Perintah ini akan menyalakan *local environment* untuk semua aplikasi (Web & API) sekaligus menghubungkannya ke *resource* cloud pribadi Anda secara *real-time*:
+### 3. Jalankan Local Development (SST + Turborepo)
+Perintah ini akan memicu **Turborepo** untuk menjalankan *local environment* bagi seluruh aplikasi (Web & API) secara paralel sekaligus menyambungkannya ke *resource* cloud pribadi Anda melalui SST:
 pnpm run dev
 
 * **Frontend (Astro/Svelte):** `http://localhost:4321`
