@@ -22,6 +22,7 @@ Platform ini menggunakan pendekatan *monorepo* dengan perpaduan teknologi beriku
 
 Repositori ini diatur ke dalam beberapa *workspace* untuk memisahkan logika bisnis, API, dan antarmuka pengguna, namun tetap berbagi tipe data (*type safety*) yang sama:
 
+```
 jeevatix/
 ├── apps/
 │   ├── api/            # Hono app (berjalan di Cloudflare Workers)
@@ -32,7 +33,7 @@ jeevatix/
 ├── sst.config.ts       # Konfigurasi infrastruktur SST
 ├── package.json        # Root package (Workspaces config)
 └── README.md
-
+```
 
 ---
 
