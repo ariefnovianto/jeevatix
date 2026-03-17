@@ -1,0 +1,24 @@
+---
+import Counter from '../components/Counter.svelte';
+---
+
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Jeevatix - Platform War Ticket</title>
+  </head>
+  <body style="font-family: system-ui, sans-serif; padding: 2rem; background: #fdfdfd; color: #111;">
+    <h1>🎟️ Selamat Datang di Jeevatix!</h1>
+    <p>Platform pembelian tiket secepat kilat. Frontend ini memadukan kecepatan Astro dan interaktivitas Svelte.</p>
+    
+    <hr style="margin: 2rem 0;" />
+    
+    <h2>Uji Coba Svelte Island</h2>
+    <!-- Render Svelte Component with client:load directive -->
+    <Counter client:load />
+
+  </body>
+</html>

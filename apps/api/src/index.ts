@@ -1,0 +1,13 @@
+import { Hono } from 'hono'
+
+const app = new Hono()
+
+app.get('/', (c) => {
+  return c.json({
+    message: 'Welcome to Jeevatix API! 🎟️',
+    status: 'ok',
+    timestamp: new Date().toISOString()
+  })
+})
+
+export default app
