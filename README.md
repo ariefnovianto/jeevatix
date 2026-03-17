@@ -18,6 +18,27 @@ Platform ini menggunakan pendekatan *monorepo* dengan perpaduan teknologi beriku
 
 ---
 
+## 🏗️ Architecture Diagram
+
+```mermaid
+graph TD
+    User([User / Browser])
+    CF_Edge[Cloudflare Edge Network]
+    Web[Astro + Svelte Frontend]
+    API[Hono Backend API]
+    Hyperdrive[Cloudflare Hyperdrive]
+    DB[(PostgreSQL)]
+
+    User --> CF_Edge
+    CF_Edge -->|Serve UI| Web
+    CF_Edge -->|API Request| API
+    Web -->|Fetch Data| API
+    API -->|Pool Connection| Hyperdrive
+    Hyperdrive -->|Query| DB
+```
+
+---
+
 ## 📂 Monorepo Structure
 
 Repositori ini diatur ke dalam beberapa *workspace* untuk memisahkan logika bisnis, API, dan antarmuka pengguna, namun tetap berbagi tipe data (*type safety*) yang sama:
@@ -53,10 +74,12 @@ Sebelum memulai *development* di *environment* lokal Anda, pastikan Anda telah m
 Ikuti langkah-langkah berikut untuk menjalankan Jeevatix di mesin lokal Anda:
 
 ### 1. Clone Repository & Install Dependencies
-git clone https://github.com/username/jeevatix.git
+
+```bash
+git clone https://github.com/ariefnovianto/jeevatix.git
 cd jeevatix
 pnpm install
-
+```
 
 ### 2. Setup Environment Variables
 Duplikat file `.env.example` menjadi `.env` di *root directory* dan isi variabel yang dibutuhkan, terutama untuk string koneksi ke database PostgreSQL Anda:
@@ -72,13 +95,25 @@ pnpm run dev
 
 ---
 
-## 🌐 Deployment
+## 🧪 Testing
 
-Proses *deployment* diotomatisasi. Untuk melakukan *deploy* manual ke *environment* produksi (Cloudflare), Anda dapat menjalankan:
+Aplikasi berskala tinggi membutuhkan pengujian yang ketat. Anda dapat menjalankan pengujian dengan perintah berikut:
 
+* **Unit & Integration Test:** `pnpm run test` (menggunakan Vitest)
+* **Load Testing:** `pnpm run test:load` (menggunakan K6 untuk mensimulasikan *war ticket*)
+
+---
+
+## 🌐 Deployment & CI/CD
+
+Proses *deployment* ke *production* sepenuhnya diotomatisasi menggunakan **GitHub Actions**. Setiap PR atau *merge* ke *branch* `main` akan memicu *pipeline* CI/CD untuk memastikan semua *test* berlalu sebelum melakukan *build* dan *deploy* ke Cloudflare.
+
+Namun, jika Anda perlu melakukan *deploy* manual dari mesin lokal, Anda dapat menjalankan:
+
+```bash
 pnpm run build
 pnpm run deploy --stage production
-
+```
 
 ---
 
