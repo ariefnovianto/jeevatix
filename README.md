@@ -16,7 +16,8 @@ Platform ini menggunakan pendekatan *monorepo* dengan perpaduan teknologi beriku
 * **Frontend:** [Astro](https://astro.build/) (Islands Architecture) + [Svelte](https://svelte.dev/) (Interactive UI)
 * **Database & Connection Pooling:** PostgreSQL (Self-Hosted) + Cloudflare Hyperdrive
 * **ORM & Database Client:** [Drizzle ORM](https://orm.drizzle.team/) (Edge-ready, Type-safe SQL builder)
-* **State Management & Queues:** [Cloudflare Durable Objects](https://developers.cloudflare.com/workers/runtime-apis/durable-objects/) (Mencegah *overselling* dan memastikan konsistensi transaksi)
+* **State Management & Concurrency:** [Cloudflare Durable Objects](https://developers.cloudflare.com/workers/runtime-apis/durable-objects/) (Mencegah *overselling* dan memastikan konsistensi transaksi)
+* **Background Processing:** [Cloudflare Queues](https://developers.cloudflare.com/queues/) (Menangani tugas asinkron seperti antrean pengiriman email e-ticket dan pembaruan laporan analitik)
 
 ---
 
