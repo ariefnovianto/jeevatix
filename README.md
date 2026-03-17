@@ -18,6 +18,7 @@ Platform ini menggunakan pendekatan *monorepo* dengan perpaduan teknologi beriku
 * **ORM & Database Client:** [Drizzle ORM](https://orm.drizzle.team/) (Edge-ready, Type-safe SQL builder)
 * **State Management & Concurrency:** [Cloudflare Durable Objects](https://developers.cloudflare.com/workers/runtime-apis/durable-objects/) (Mencegah *overselling* dan memastikan konsistensi transaksi)
 * **Background Processing:** [Cloudflare Queues](https://developers.cloudflare.com/queues/) (Menangani tugas asinkron seperti antrean pengiriman email e-ticket dan pembaruan laporan analitik)
+* **Real-time WebSocket:** [PartyKit](https://www.partykit.io/) (Menyiarkan status ketersediaan tiket secara *live* dan mengelola ruang antrean tanpa membebani database)
 
 ---
 
@@ -27,17 +28,38 @@ Platform ini menggunakan pendekatan *monorepo* dengan perpaduan teknologi beriku
 graph TD
     User([User / Browser])
     CF_Edge[Cloudflare Edge Network]
-    Web[Astro + Svelte Frontend]
-    API[Hono Backend API]
-    Hyperdrive[Cloudflare Hyperdrive]
-    DB[(PostgreSQL)]
+    
+    subgraph Frontend & API
+        Web[Astro + Svelte Frontend]
+        PartyKit[PartyKit WebSocket]
+        API[Hono API + Drizzle ORM]
+    end
+    
+    subgraph Edge State & Workers
+        DO[Durable Objects <br> Concurrency/Lock]
+        Queue[Cloudflare Queues <br> Background Jobs]
+    end
+    
+    subgraph Data Layer
+        Hyperdrive[Cloudflare Hyperdrive]
+        DB[(PostgreSQL)]
+    end
 
-    User --> CF_Edge
+    User -->|HTTP & WS| CF_Edge
     CF_Edge -->|Serve UI| Web
-    CF_Edge -->|API Request| API
-    Web -->|Fetch Data| API
-    API -->|Pool Connection| Hyperdrive
-    Hyperdrive -->|Query| DB
+    CF_Edge -->|API Requests| API
+    CF_Edge -->|Live Updates| PartyKit
+
+    Web -->|Fetch/Mutate| API
+    Web -.->|Listen to Status| PartyKit
+    
+    API -->|Reserve Ticket| DO
+    API -->|Async Tasks| Queue
+    API -->|Query via Drizzle| Hyperdrive
+    DO -->|Sync State| Hyperdrive
+    Queue -.->|Process| API
+    
+    Hyperdrive -->|Execute SQL| DB
 ```
 
 ---
