@@ -9,12 +9,11 @@ Jeevatix adalah platform jual beli tiket *event* berkinerja tinggi yang dirancan
 ## 🚀 Tech Stack
 
 Platform ini menggunakan pendekatan *monorepo* dengan perpaduan teknologi berikut:
-
 * **Infrastructure as Code (IaC):** [SST (Serverless Stack)](https://sst.dev/)
 * **Build System:** [Turborepo](https://turbo.build/) (Manajemen eksekusi *task* monorepo yang sangat cepat & *incremental*)
 * **Edge Compute:** Cloudflare Workers
 * **Backend / API:** [Hono](https://hono.dev/) (Super-fast, lightweight web framework)
-* **Frontend:** [Astro](https://astro.build/) (Islands Architecture) + [Svelte](https://svelte.dev/) (Interactive UI)
+* **Frontend:** [Astro](https://astro.build/) (Portal Web Pembeli) + [SvelteKit](https://svelte.dev/) (Portal Admin & Seller) + [shadcn-svelte](https://shadcn-svelte.com/)
 * **Database & Connection Pooling:** PostgreSQL (Self-Hosted) + Cloudflare Hyperdrive
 * **ORM & Database Client:** [Drizzle ORM](https://orm.drizzle.team/) (Edge-ready, Type-safe SQL builder)
 * **State Management & Concurrency:** [Cloudflare Durable Objects](https://developers.cloudflare.com/workers/runtime-apis/durable-objects/) (Mencegah *overselling* dan memastikan konsistensi transaksi)
@@ -31,7 +30,8 @@ graph TD
     CF_Edge[Cloudflare Edge Network]
     
     subgraph Frontend & API
-        Web[Astro + Svelte Frontend]
+        Buyer[Astro Frontend]
+        Admin[SvelteKit Admin/Seller]
         PartyKit[PartyKit WebSocket]
         API[Hono API + Drizzle ORM]
     end
@@ -47,12 +47,14 @@ graph TD
     end
 
     User -->|HTTP & WS| CF_Edge
-    CF_Edge -->|Serve UI| Web
+    CF_Edge -->|Serve UI| Buyer
+    CF_Edge -->|Serve UI| Admin
     CF_Edge -->|API Requests| API
     CF_Edge -->|Live Updates| PartyKit
 
-    Web -->|Fetch/Mutate| API
-    Web -.->|Listen to Status| PartyKit
+    Buyer -->|Fetch/Mutate| API
+    Admin -->|Fetch/Mutate| API
+    Buyer -.->|Listen to Status| PartyKit
     
     API -->|Reserve Ticket| DO
     API -->|Async Tasks| Queue
@@ -67,15 +69,18 @@ graph TD
 
 ## 📂 Monorepo Structure
 
-Repositori ini diatur ke dalam beberapa *workspace* untuk memisahkan logika bisnis, API, dan antarmuka pengguna, namun tetap berbagi tipe data (*type safety*) yang sama:
+Repositori ini diatur ke dalam beberapa *workspace* untuk memisahkan logika bisnis, antarmuka pengguna, namun tetap berbagi gaya (UI) dan tipe data:
 
 ```
 jeevatix/
 ├── apps/
-│   ├── api/            # Hono app (berjalan di Cloudflare Workers)
-│   └── web/            # Astro + Svelte frontend (UI Utama)
+│   ├── api/            # Hono backend API (berjalan di Cloudflare Workers)
+│   ├── buyer/          # Astro portal untuk pembeli tiket (berbasis konten, sangat cepat)
+│   ├── admin/          # SvelteKit portal untuk dashboard admin Jeevatix
+│   └── seller/         # SvelteKit portal untuk penjual / penyelenggara event
 ├── packages/
-│   ├── core/           # Logika bisnis utama, koneksi database, utils
+│   ├── core/           # Logika bisnis utama, Drizzle schema, koneksi database
+│   ├── ui/             # Shared UI components (TailwindCSS, shadcn-svelte)
 │   └── types/          # Shared TypeScript interfaces (Event, Ticket, dll)
 ├── sst.config.ts       # Konfigurasi infrastruktur SST
 ├── turbo.json          # Pipeline eksekusi Turborepo
@@ -88,7 +93,6 @@ jeevatix/
 ## 🛠️ Prerequisites
 
 Sebelum memulai *development* di *environment* lokal Anda, pastikan Anda telah menginstal:
-
 * **Node.js** (v18 atau lebih baru)
 * **pnpm** (Direkomendasikan untuk manajemen *monorepo* yang efisien)
 * Akun **Cloudflare** (untuk konfigurasi *deployment* dan Hyperdrive)
@@ -110,22 +114,33 @@ pnpm install
 
 ### 2. Setup Environment Variables
 Duplikat file `.env.example` menjadi `.env` di *root directory* dan isi variabel yang dibutuhkan, terutama untuk string koneksi ke database PostgreSQL Anda:
+```bash
 cp .env.example .env
+```
 
-
-### 3. Jalankan Local Development (SST + Turborepo)
-Perintah ini akan memicu **Turborepo** untuk menjalankan *local environment* bagi seluruh aplikasi (Web & API) secara paralel sekaligus menyambungkannya ke *resource* cloud pribadi Anda melalui SST:
+### 3. Jalankan Local Development (Turborepo)
+Perintah ini akan memicu **Turborepo** untuk menjalankan *local environment* bagi seluruh aplikasi (Portal Pembeli, Admin, Seller & API) secara paralel sekaligus menyambungkannya ke *resource* cloud melalui SST:
+```bash
 pnpm run dev
+```
 
-* **Frontend (Astro/Svelte):** `http://localhost:4321`
-* **Backend (Hono API):** `http://localhost:3000`
+Anda bisa mengakses aplikasi di port berikut:
+* **Portal Pembeli (Astro):** [http://localhost:4301](http://localhost:4301)
+* **Portal Admin (SvelteKit):** [http://localhost:4302](http://localhost:4302)
+* **Portal Penjual/Seller (SvelteKit):** [http://localhost:4303](http://localhost:4303)
+* **Backend API (Hono):** `http://localhost:8787` (atau port dinamis wrangler)
 
 ---
 
 ## 🧪 Testing
 
-Aplikasi berskala tinggi membutuhkan pengujian yang ketat. Anda dapat menjalankan pengujian dengan perintah berikut:
+Aplikasi berskala tinggi membutuhkan pengujian yang ketat. Anda dapat menjalankan beberapa tipe pengujian:
 
+* **E2E Testing (Playwright):** Menjalankan pengujian UI / Layout untuk memastikan halaman berfungsi di browser. Contoh pada portal admin:
+  ```bash
+  cd apps/admin
+  npx playwright test
+  ```
 * **Unit & Integration Test:** `pnpm run test` (menggunakan Vitest)
 * **Load Testing:** `pnpm run test:load` (menggunakan K6 untuk mensimulasikan *war ticket*)
 
@@ -134,9 +149,7 @@ Aplikasi berskala tinggi membutuhkan pengujian yang ketat. Anda dapat menjalanka
 ## 🌐 Deployment & CI/CD
 
 Proses *deployment* ke *production* sepenuhnya diotomatisasi menggunakan **GitHub Actions**. Setiap PR atau *merge* ke *branch* `main` akan memicu *pipeline* CI/CD untuk memastikan semua *test* berlalu sebelum melakukan *build* dan *deploy* ke Cloudflare.
-
 Namun, jika Anda perlu melakukan *deploy* manual dari mesin lokal, Anda dapat menjalankan:
-
 ```bash
 pnpm run build
 pnpm run deploy --stage production
@@ -146,4 +159,4 @@ pnpm run deploy --stage production
 
 ## 📝 License
 
-Hak Cipta © 2026 Jeevatix. All rights reserved.
+Distributed under the MIT License. See `LICENSE` for more information.
