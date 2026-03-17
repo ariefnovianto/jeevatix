@@ -1,9 +1,9 @@
 {
-  "name": "@jeevatix/web",
+  "name": "@jeevatix/buyer",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "astro dev --port 4321",
+    "dev": "astro dev --port 4301",
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
